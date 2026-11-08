@@ -1,0 +1,124 @@
+Skip to content
+-Predicting-patients-risks-and-hospital-outcomes-Data-science-python-
+Repository navigation
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security and quality
+Insights
+Settings
+Commit 08268e5
+aravindrajkalaivanan-collab
+aravindrajkalaivanan-collab
+authored
+on Aug 25
+Verified
+Create source code
+main
+1 parent 
+31570be
+ commit 
+08268e5
+1 file changed
+
++95
+Lines changed: 95 additions & 0 deletions
+File tree
+Filter files…
+source code
+Search within code
+ 
+‎source code‎
++95
+Lines changed: 95 additions & 0 deletions
+Original file line number	Diff line number	Diff line change
+@@ -0,0 +1,95 @@
+# 📦 Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+# 📁 Load Dataset
+df = pd.read_csv("Hospital dataset.csv.csv")  # Use exact filename as uploaded
+# 🧹 Clean Columns
+df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+# 🔄 Convert 'duration' to numeric values
+duration_map = {
+    '5day': 5, '7days': 7, '6months': 180,
+    'weekly': 30, 'life long': 365
+}
+df['duration_days'] = df['duration'].replace(duration_map)
+df['duration_days'] = pd.to_numeric(df['duration_days'], errors='coerce').fillna(0)
+# 🧠 Label Encode Categorical Columns
+cat_cols = ['gender', 'disease', 'treatment', 'types_of_treatment', 
+            'doctor_name', 'follow-up', 'discharge/not_disease']
+le = LabelEncoder()
+for col in cat_cols:
+    df[col] = le.fit_transform(df[col].astype(str))
+# 📊 NumPy Statistics
+print("📌 Mean Age:", np.mean(df['age']))
+print("📌 Median Duration:", np.median(df['duration_days']))
+print("📌 Correlation (Age vs Duration):", np.corrcoef(df['age'], df['duration_days'])[0, 1])
+# 📉 Seaborn Plot: Disease Count
+plt.figure(figsize=(8, 4))
+sns.countplot(x='disease', data=df, palette='Set2')
+plt.title("Disease Frequency")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+# 📈 Seaborn Plot: Correlation Heatmap
+plt.figure(figsize=(6, 4))
+sns.heatmap(df[['age', 'duration_days']].corr(), annot=True, cmap="coolwarm")
+plt.title("Correlation: Age vs Duration")
+plt.tight_layout()
+plt.show()
+# 📌 Plotly Plot: Age Distribution
+fig1 = px.histogram(df, x='age', nbins=10, title='Patient Age Distribution')
+fig1.show()
+# 📌 Plotly Plot: Gender vs Duration
+fig2 = px.box(df, x='gender', y='duration_days', color='gender', title='Treatment Duration by Gender')
+fig2.show()
+# 🧪 Model Preparation
+features = ['age', 'gender', 'disease', 'types_of_treatment', 'duration_days']
+target = 'discharge/not_disease'
+X = df[features]
+y = df[target]
+# 🔀 Train/Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# 🌳 Train Random Forest Classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+# ✅ Model Evaluation
+print("🎯 Accuracy:", accuracy_score(y_test, y_pred))
+print("\n📝 Classification Report:\n", classification_report(y_test, y_pred))
+# 🔍 Confusion Matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt="d", cmap="Blues")
+plt.title("Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.tight_layout()
+plt.show()
+# 💡 Feature Importance Plot
+feat_imp = pd.Series(model.feature_importances_, index=features)
+plt.figure(figsize=(6, 4))
+feat_imp.sort_values().plot(kind='barh', color='teal')
+plt.title("Feature Importance (Random Forest)")
+plt.xlabel("Importance Score")
+plt.tight_layout()
+plt.show()
+0 commit comments
+Comments
+0
+ (0)
+Comment
+You're not receiving notifications from this thread.
+
